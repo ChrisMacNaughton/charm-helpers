@@ -340,8 +340,9 @@ class ReplicatedPool(Pool):
                 if 'pg_autoscaler' in enabled_manager_modules():
                     try:
                         enable_pg_autoscale(self.service, self.name)
-                    except CalledProcessError:
-                        log('Could not configure auto scaling for pool {}'.format(self.name, level=WARNING))
+                    except CalledProcessError as e:
+                        log('Could not configure auto scaling for pool {}: {}'.format(
+                            self.name, e, level=WARNING))
             except CalledProcessError:
                 raise
 
@@ -403,8 +404,9 @@ class ErasurePool(Pool):
                 if 'pg_autoscaler' in enabled_manager_modules():
                     try:
                         enable_pg_autoscale(self.service, self.name)
-                    except CalledProcessError:
-                        log('Could not configure auto scaling for pool {}'.format(self.name, level=WARNING))
+                    except CalledProcessError as e:
+                        log('Could not configure auto scaling for pool {}: {}'.format(
+                            self.name, e, level=WARNING))
             except CalledProcessError:
                 raise
 
@@ -415,11 +417,13 @@ class ErasurePool(Pool):
 def enabled_manager_modules():
     """Return a list of enabled manager modules.
 
-    :returns: list[str]
+    :rtype: List[str]
     """
     cmd = ['ceph', 'mgr', 'module', 'ls']
     try:
         modules = check_output(cmd)
+        if six.PY3:
+            modules = modules.decode('utf-8')
     except CalledProcessError as e:
         log("Failed to list ceph modules: {}".format(e), WARNING)
         return []
