@@ -6,8 +6,14 @@ Listen {{ ext_port }}
 <VirtualHost {{ address }}:{{ ext }}>
     ServerName {{ endpoint }}
     SSLEngine on
-    SSLProtocol +TLSv1 +TLSv1.1 +TLSv1.2
+
+    # The TLC configuration below has been imported from
+    # https://ssl-config.mozilla.org/#server=apache&version=2.4.18&config=intermediate&openssl=1.1.1d&hsts=false&ocsp=false&guideline=5.4
+    SSLProtocol             all -SSLv3 -TLSv1 -TLSv1.1
     SSLCipherSuite HIGH:!RC4:!MD5:!aNULL:!eNULL:!EXP:!LOW:!MEDIUM
+    SSLHonorCipherOrder     off
+    SSLSessionTickets       off
+
     SSLCertificateFile /etc/apache2/ssl/{{ namespace }}/cert_{{ endpoint }}
     # See LP 1484489 - this is to support <= 2.4.7 and >= 2.4.8
     SSLCertificateChainFile /etc/apache2/ssl/{{ namespace }}/cert_{{ endpoint }}
